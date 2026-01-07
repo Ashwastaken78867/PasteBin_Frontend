@@ -9,10 +9,21 @@ export default function ViewPaste() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    setContent(null);
+    setError(null);
+
     axios
-      .get(`/api/pastes/${id}`)
+      .get(`http://localhost:5000/api/pastes/${id}`)
       .then((res) => setContent(res.data.content))
-      .catch(() => setError("Paste unavailable"));
+      .catch((err) => {
+        if (err.response?.status === 410) {
+          setError("Paste expired - max views reached");
+        } else if (err.response?.status === 404) {
+          setError("Paste not found");
+        } else {
+          setError("Paste unavailable");
+        }
+      });
   }, [id]);
 
   if (error) return <h3>{error}</h3>;
